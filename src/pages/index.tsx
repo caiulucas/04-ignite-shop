@@ -1,11 +1,14 @@
 import 'keen-slider/keen-slider.min.css';
 import { useKeenSlider } from 'keen-slider/react';
 import { GetStaticProps } from 'next';
+import Head from 'next/head';
 import Image from 'next/image';
+import Link from 'next/link';
 import Stripe from 'stripe';
 
 import { stripe } from '@/libs/stripe';
 import { HomeContainer, Product } from '@/styles/pages/home';
+import { numberFormatter } from '@/utils/formatter';
 
 type ProductData = {
   id: string;
@@ -27,18 +30,29 @@ export default function Home({ products }: HomeProps) {
   });
 
   return (
-    <HomeContainer ref={sliderRef} className="keen-slider">
-      {products.map((product) => (
-        <Product key={product.id} className="keen-slider__slide">
-          <Image src={product.imageUrl} width={520} height={480} alt="" />
+    <>
+      <Head>
+        <title>Home | Ignite Shop</title>
+      </Head>
+      <HomeContainer ref={sliderRef} className="keen-slider">
+        {products.map((product) => (
+          <Link
+            key={product.id}
+            href={`/product/${product.id}`}
+            prefetch={false}
+          >
+            <Product className="keen-slider__slide">
+              <Image src={product.imageUrl} width={520} height={480} alt="" />
 
-          <footer>
-            <strong>{product.name}</strong>
-            <span>{product.price}</span>
-          </footer>
-        </Product>
-      ))}
-    </HomeContainer>
+              <footer>
+                <strong>{product.name}</strong>
+                <span>{product.price}</span>
+              </footer>
+            </Product>
+          </Link>
+        ))}
+      </HomeContainer>
+    </>
   );
 }
 
@@ -54,12 +68,12 @@ export const getStaticProps: GetStaticProps = async () => {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      }).format(Number(price.unit_amount) / 100)
+      price: numberFormatter.format(Number(price.unit_amount) / 100)
     };
   });
 
-  return { props: { products } };
+  return {
+    props: { products },
+    revalidate: 60 * 60 * 1 // 1 hour
+  };
 };
