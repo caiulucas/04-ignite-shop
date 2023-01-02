@@ -36,13 +36,21 @@ export const SuccessContainer = styled('main', {
   }
 });
 
+export const Images = styled('div', {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+});
+
 export const ImageContainer = styled('div', {
-  width: '8.125rem',
-  height: '9.0625rem',
+  width: '8.75rem',
+  height: '8.75rem',
   background: 'linear-gradient(180deg, #1ea483 0%, #7465d4 100%)',
-  borderRadius: 8,
+  borderRadius: '50%',
   padding: '0.25rem',
   marginTop: '4rem',
+  marginLeft: '-1.625rem',
+  marginRight: '-1.625rem',
 
   display: 'flex',
   alignItems: 'center',

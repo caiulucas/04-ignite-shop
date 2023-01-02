@@ -1,10 +1,10 @@
-import axios from 'axios';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import Head from 'next/head';
 import Image from 'next/image';
-import { useState } from 'react';
 import Stripe from 'stripe';
+import { useContextSelector } from 'use-context-selector';
 
+import { ProductBagContext } from '@/contexts/productBag';
 import { stripe } from '@/libs/stripe';
 import {
   ImageContainer,
@@ -18,6 +18,7 @@ type ProductData = {
   name: string;
   imageUrl: string;
   price: string;
+  rawPrice: number;
   description: string;
   defaultPriceId: string;
 };
@@ -27,26 +28,10 @@ interface ProductProps {
 }
 
 export default function Product({ product }: ProductProps) {
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] =
-    useState(false);
-
-  async function handleBuyProduct() {
-    try {
-      setIsCreatingCheckoutSession(true);
-      const response = await axios.post('/api/checkout', {
-        priceId: product.defaultPriceId
-      });
-
-      const { checkoutUrl } = response.data;
-
-      window.location.href = checkoutUrl;
-    } catch (err) {
-      console.error(err);
-
-      alert('Falha ao redirecionar ao checkout!');
-      setIsCreatingCheckoutSession(false);
-    }
-  }
+  const addToBag = useContextSelector(
+    ProductBagContext,
+    (context) => context.addToBag
+  );
 
   return (
     <>
@@ -64,12 +49,7 @@ export default function Product({ product }: ProductProps) {
 
           <p>{product.description}</p>
 
-          <button
-            disabled={isCreatingCheckoutSession}
-            onClick={handleBuyProduct}
-          >
-            Comprar agora
-          </button>
+          <button onClick={() => addToBag(product)}>Colocar na sacola</button>
         </ProductDetails>
       </ProductContainer>
     </>
@@ -79,7 +59,7 @@ export default function Product({ product }: ProductProps) {
 export const getStaticPaths: GetStaticPaths = () => {
   return {
     paths: [],
-    fallback: true
+    fallback: 'blocking'
   };
 };
 
@@ -102,6 +82,7 @@ export const getStaticProps: GetStaticProps<
         name: product.name,
         imageUrl: product.images[0],
         price: numberFormatter.format(Number(price.unit_amount) / 100),
+        rawPrice: Number(price.unit_amount),
         defaultPriceId: price.id,
         description: product.description
       }

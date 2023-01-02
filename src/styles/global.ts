@@ -16,5 +16,12 @@ export const globalStyles = globalCss({
   'body, input, textarea, button': {
     fontFamily: 'Roboto',
     fontWeight: 400
+  },
+
+  button: {
+    padding: 0,
+    margin: 0,
+    borderStyle: 'none',
+    cursor: 'pointer'
   }
 });
